@@ -1,73 +1,62 @@
-# React + TypeScript + Vite
+# Adaptive EQ AI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Adaptive EQ AI is a simple intelligent audio system that aims to automatically adjust equalization based on the song, listening patterns, and user preferences for a more personalized sound experience.
 
-Currently, two official plugins are available:
+## Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Adaptive EQ AI is designed to move beyond static presets by analyzing audio and shaping EQ output dynamically. The long-term goal is to combine audio understanding, user behavior, and AI-generated insights into one adaptive listening system.
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- EQ dashboard for visual tuning insights
+- Audio player with a modern music-app style interface
+- History and insights page for past songs and tuning patterns
+- Mock adaptive EQ recommendations in the current frontend
+- Modular structure for future backend and AI integration
 
-## Expanding the ESLint configuration
+## How It Works
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. Audio Input  
+   A song or audio stream is provided to the system.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+2. Feature Extraction  
+   Audio features such as spectrum, energy, tempo, and tonal balance are analyzed.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+3. EQ Decision Layer  
+   A rule-based or ML-based system determines the best EQ adjustments.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+4. Personalization Layer  
+   User history, habits, and repeated preferences influence recommendations.
+
+5. Output  
+   The system applies EQ settings and presents enhanced playback with insights.
+
+## Tech Direction
+
+- Frontend: React + TypeScript + Vite
+- Styling: Custom CSS
+- Backend:
+- Audio processing:
+- AI / ML:
+
+## How to run
+
+1. Install dependencies
+2. Run the frontend locally
+
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Build
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run build
 ```
+
+## Goal
+
+The goal is to build an adaptive EQ system that improves audio automatically while learning from music content and listener behavior over time.
+
+
