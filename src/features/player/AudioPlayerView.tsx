@@ -7,6 +7,8 @@ type AudioPlayerViewProps = {
 
 export function AudioPlayerView({ player }: AudioPlayerViewProps) {
   const [status, setStatus] = useState(player.playback.status)
+  const hasTrack = Boolean(player.track.title)
+  const hasCurve = player.curve.bands.length > 0
 
   return (
     <section className="spotify-page">
@@ -17,17 +19,17 @@ export function AudioPlayerView({ player }: AudioPlayerViewProps) {
             style={{ backgroundImage: player.track.artworkGradient }}
           >
             <span>Now playing</span>
-            <strong>{player.track.genre}</strong>
+            <strong>{hasTrack ? player.track.genre : 'Nothing playing'}</strong>
           </div>
 
           <div className="spotify-details">
             <span className="eyebrow">Audio Player</span>
-            <h2>{player.track.title}</h2>
-            <p className="subtle-copy">{player.track.artist}</p>
+            <h2>{hasTrack ? player.track.title : 'No track selected'}</h2>
+            <p className="subtle-copy">
+              {hasTrack ? player.track.artist : 'Add audio to start playback.'}
+            </p>
 
             <div className="player-pills">
-              <span className="pill">Adaptive EQ</span>
-              <span className="pill">{player.curve.presetName}</span>
               <span className="pill">{status}</span>
             </div>
 
@@ -64,25 +66,31 @@ export function AudioPlayerView({ player }: AudioPlayerViewProps) {
           <div className="card-header">
             <div>
               <span className="eyebrow">EQ snapshot</span>
-              <h3>{player.curve.profile}</h3>
+              <h3>{hasCurve ? player.curve.profile : 'No EQ data yet'}</h3>
             </div>
           </div>
-          <div className="mini-band-grid mini-band-grid--wide">
-            {player.curve.bands.map((band) => (
-              <div className="mini-band" key={band.label}>
-                <span>{band.label}</span>
-                <strong>
-                  {band.gainDb > 0 ? '+' : ''}
-                  {band.gainDb.toFixed(1)} dB
-                </strong>
+          {hasCurve ? (
+            <>
+              <div className="mini-band-grid mini-band-grid--wide">
+                {player.curve.bands.map((band) => (
+                  <div className="mini-band" key={band.label}>
+                    <span>{band.label}</span>
+                    <strong>
+                      {band.gainDb > 0 ? '+' : ''}
+                      {band.gainDb.toFixed(1)} dB
+                    </strong>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <div className="note-stack">
-            {player.contextNotes.map((note) => (
-              <p key={note}>{note}</p>
-            ))}
-          </div>
+              <div className="note-stack">
+                {player.contextNotes.map((note) => (
+                  <p key={note}>{note}</p>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="queue-empty">EQ details will appear here once audio is loaded.</div>
+          )}
         </article>
       </div>
 
@@ -90,17 +98,21 @@ export function AudioPlayerView({ player }: AudioPlayerViewProps) {
         <div className="card side-card">
           <span className="eyebrow">Up next</span>
           <h3>Queue</h3>
-          <div className="queue-list">
-            {player.queue.map((item) => (
-              <div className={`queue-item${item.isActive ? ' is-active' : ''}`} key={item.id}>
-                <div>
-                  <strong>{item.title}</strong>
-                  <p>{item.artist}</p>
+          {player.queue.length > 0 ? (
+            <div className="queue-list">
+              {player.queue.map((item) => (
+                <div className={`queue-item${item.isActive ? ' is-active' : ''}`} key={item.id}>
+                  <div>
+                    <strong>{item.title}</strong>
+                    <p>{item.artist}</p>
+                  </div>
+                  <span>{item.durationLabel}</span>
                 </div>
-                <span>{item.durationLabel}</span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="queue-empty">No songs queued yet.</div>
+          )}
         </div>
       </aside>
     </section>

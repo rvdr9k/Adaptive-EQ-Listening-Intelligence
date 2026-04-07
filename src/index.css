@@ -550,6 +550,14 @@ button {
   background: rgba(30, 215, 96, 0.1);
 }
 
+.queue-empty {
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  color: rgba(244, 247, 248, 0.62);
+  background: rgba(255, 255, 255, 0.02);
+}
+
 .pattern-callout {
   margin-top: 12px;
   padding: 12px 14px;

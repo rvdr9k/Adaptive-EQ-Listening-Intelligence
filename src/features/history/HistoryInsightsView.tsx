@@ -23,43 +23,51 @@ export function HistoryInsightsView({ insights }: HistoryInsightsViewProps) {
             </div>
           </div>
 
-          <div className="session-list">
-            {insights.sessions.map((session) => (
-              <div className="session-card" key={session.id}>
-                <div className="session-card__top">
-                  <div>
-                    <strong>{session.title}</strong>
-                    <p>{session.artist}</p>
+          {insights.sessions.length > 0 ? (
+            <div className="session-list">
+              {insights.sessions.map((session) => (
+                <div className="session-card" key={session.id}>
+                  <div className="session-card__top">
+                    <div>
+                      <strong>{session.title}</strong>
+                      <p>{session.artist}</p>
+                    </div>
+                    <span>{session.listenedAt}</span>
                   </div>
-                  <span>{session.listenedAt}</span>
+                  <div className="tag-row">
+                    <span className="tag">{session.genre}</span>
+                    <span className="tag">{session.eqSnapshot}</span>
+                  </div>
+                  <p>{session.insight}</p>
+                  <div className="pattern-callout">
+                    {session.pattern ?? 'Unique tuning session with no repeated pattern flagged.'}
+                  </div>
                 </div>
-                <div className="tag-row">
-                  <span className="tag">{session.genre}</span>
-                  <span className="tag">{session.eqSnapshot}</span>
-                </div>
-                <p>{session.insight}</p>
-                <div className="pattern-callout">
-                  {session.pattern ?? 'Unique tuning session with no repeated pattern flagged.'}
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="queue-empty">Your listening history will appear here.</div>
+          )}
         </article>
 
         <article className="card card-soft">
           <span className="eyebrow">Pattern library</span>
           <h3>Cross-session insights</h3>
-          <div className="pattern-list">
-            {insights.patterns.map((pattern) => (
-              <div className="pattern-card" key={pattern.id}>
-                <div className="pattern-card__head">
-                  <strong>{pattern.title}</strong>
-                  <span>{pattern.strength}</span>
+          {insights.patterns.length > 0 ? (
+            <div className="pattern-list">
+              {insights.patterns.map((pattern) => (
+                <div className="pattern-card" key={pattern.id}>
+                  <div className="pattern-card__head">
+                    <strong>{pattern.title}</strong>
+                    <span>{pattern.strength}</span>
+                  </div>
+                  <p>{pattern.description}</p>
                 </div>
-                <p>{pattern.description}</p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="queue-empty">Insights will show up here after listening activity is recorded.</div>
+          )}
         </article>
       </div>
     </section>

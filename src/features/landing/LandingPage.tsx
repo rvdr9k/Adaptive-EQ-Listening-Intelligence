@@ -12,10 +12,10 @@ export function LandingPage() {
           </p>
           <div className="landing-actions">
             <a className="primary-link" href="#/player">
-              Enter app
+              Enter App
             </a>
             <a className="secondary-link" href="#/dashboard">
-              View dashboard
+              Dashboard
             </a>
           </div>
         </div>
@@ -23,15 +23,15 @@ export function LandingPage() {
         <div className="landing-showcase">
           <div className="showcase-card">
             <span>EQ Dashboard</span>
-            <strong>Curve intelligence</strong>
+            <strong>Curve Intelligence</strong>
           </div>
           <div className="showcase-card">
             <span>Audio Player</span>
-            <strong>Streaming-inspired layout</strong>
+            <strong>Current Song and Queue</strong>
           </div>
           <div className="showcase-card">
             <span>History</span>
-            <strong>Genre tuning and patterns</strong>
+            <strong>Genre Tuning and Patterns</strong>
           </div>
         </div>
       </section>
