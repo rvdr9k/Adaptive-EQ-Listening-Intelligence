@@ -53,11 +53,10 @@ button {
 }
 
 .landing-shell {
-  width: min(1180px, calc(100% - 32px));
-  margin: 0 auto;
+  width: 100%;
   display: grid;
   align-items: center;
-  padding: 28px 0;
+  padding: 28px 24px;
 }
 
 .landing-hero {
@@ -210,9 +209,8 @@ button {
   display: grid;
   grid-template-columns: 270px minmax(0, 1fr);
   gap: 20px;
-  width: min(1380px, calc(100% - 28px));
-  margin: 0 auto;
-  padding: 14px 0;
+  width: 100%;
+  padding: 14px;
 }
 
 .sidebar,
@@ -473,6 +471,10 @@ button {
   box-shadow: inset 0 -90px 120px rgba(0, 0, 0, 0.34);
 }
 
+.spotify-cover--empty {
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
 .spotify-cover strong {
   font-size: 1.34rem;
   margin-top: 6px;
@@ -482,6 +484,36 @@ button {
   display: grid;
   align-content: center;
   gap: 16px;
+}
+
+.upload-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 12px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #f4f7f8;
+  cursor: pointer;
+}
+
+.upload-control input {
+  display: none;
+}
+
+.upload-meta,
+.upload-error {
+  margin: 0;
+}
+
+.upload-meta {
+  color: rgba(244, 247, 248, 0.62);
+}
+
+.upload-error {
+  color: #ff9696;
 }
 
 .spotify-details h2 {
@@ -524,12 +556,19 @@ button {
 
 .ghost-button--round,
 .primary-button--round {
-  width: 52px;
+  min-width: 52px;
   height: 52px;
-  padding: 0;
+  padding: 0 12px;
   display: grid;
   place-items: center;
-  font-size: 1.15rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
+.primary-button:disabled,
+.ghost-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .spotify-card,
@@ -589,7 +628,7 @@ button {
 @media (max-width: 720px) {
   .landing-shell,
   .app-frame {
-    width: min(100% - 18px, 1380px);
+    width: 100%;
   }
 
   .landing-hero,
