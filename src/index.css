@@ -347,6 +347,26 @@ button {
   color: #b8ffcf;
 }
 
+.pill--status {
+  text-transform: capitalize;
+}
+
+.pill--idle {
+  color: rgba(244, 247, 248, 0.7);
+}
+
+.pill--saving {
+  color: #ffd27d;
+}
+
+.pill--success {
+  color: #b8ffcf;
+}
+
+.pill--error {
+  color: #ff9696;
+}
+
 .dashboard-grid,
 .history-layout {
   display: grid;
@@ -431,6 +451,13 @@ button {
   padding: 16px;
   background: rgba(255, 255, 255, 0.035);
   border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.session-card--button {
+  width: 100%;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .tag {

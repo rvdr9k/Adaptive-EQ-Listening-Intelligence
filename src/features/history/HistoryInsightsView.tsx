@@ -1,16 +1,39 @@
-import type { HistoryInsights } from '../../types/eq'
+import type { UploadedTrack } from '../../types/eq'
 
 type HistoryInsightsViewProps = {
-  insights: HistoryInsights
+  historyMessage?: string
+  onOpenTrack: (trackId: string) => void
+  tracks: UploadedTrack[]
 }
 
-export function HistoryInsightsView({ insights }: HistoryInsightsViewProps) {
+const formatDate = (value: string) =>
+  new Date(value).toLocaleString(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  })
+
+const formatDuration = (durationSeconds: number | null) => {
+  if (durationSeconds === null) {
+    return 'Unknown duration'
+  }
+
+  const minutes = Math.floor(durationSeconds / 60)
+  const seconds = Math.floor(durationSeconds % 60)
+
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`
+}
+
+export function HistoryInsightsView({
+  historyMessage,
+  onOpenTrack,
+  tracks,
+}: HistoryInsightsViewProps) {
   return (
     <section className="panel-stack">
       <div className="section-heading">
         <div>
           <span className="eyebrow">History & Insights</span>
-          <h2>Past songs, EQ choices, and tuning patterns</h2>
+          <h2>Saved uploads and cloud-backed playback history</h2>
         </div>
       </div>
 
@@ -19,55 +42,47 @@ export function HistoryInsightsView({ insights }: HistoryInsightsViewProps) {
           <div className="card-header">
             <div>
               <span className="eyebrow">Listening history</span>
-              <h3>Recent sessions</h3>
+              <h3>Saved tracks</h3>
             </div>
           </div>
 
-          {insights.sessions.length > 0 ? (
+          {tracks.length > 0 ? (
             <div className="session-list">
-              {insights.sessions.map((session) => (
-                <div className="session-card" key={session.id}>
+              {tracks.map((track) => (
+                <button
+                  className="session-card session-card--button"
+                  key={track.id}
+                  onClick={() => onOpenTrack(track.id)}
+                  type="button"
+                >
                   <div className="session-card__top">
                     <div>
-                      <strong>{session.title}</strong>
-                      <p>{session.artist}</p>
+                      <strong>{track.title}</strong>
+                      <p>{track.originalFilename}</p>
                     </div>
-                    <span>{session.listenedAt}</span>
+                    <span>{formatDate(track.createdAt)}</span>
                   </div>
                   <div className="tag-row">
-                    <span className="tag">{session.genre}</span>
-                    <span className="tag">{session.eqSnapshot}</span>
+                    <span className="tag">{track.mimeType}</span>
+                    <span className="tag">{formatDuration(track.durationSeconds)}</span>
                   </div>
-                  <p>{session.insight}</p>
-                  <div className="pattern-callout">
-                    {session.pattern ?? 'Unique tuning session with no repeated pattern flagged.'}
-                  </div>
-                </div>
+                  <p>Click to reopen this saved track in the player.</p>
+                </button>
               ))}
             </div>
           ) : (
-            <div className="queue-empty">Your listening history will appear here.</div>
+            <div className="queue-empty">
+              {historyMessage || 'Your saved uploads will appear here.'}
+            </div>
           )}
         </article>
 
         <article className="card card-soft">
-          <span className="eyebrow">Pattern library</span>
-          <h3>Cross-session insights</h3>
-          {insights.patterns.length > 0 ? (
-            <div className="pattern-list">
-              {insights.patterns.map((pattern) => (
-                <div className="pattern-card" key={pattern.id}>
-                  <div className="pattern-card__head">
-                    <strong>{pattern.title}</strong>
-                    <span>{pattern.strength}</span>
-                  </div>
-                  <p>{pattern.description}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="queue-empty">Insights will show up here after listening activity is recorded.</div>
-          )}
+          <span className="eyebrow">Next layer</span>
+          <h3>Insights are still empty</h3>
+          <div className="queue-empty">
+            This page now stores real uploaded tracks. EQ insights and listening patterns can be added later on top of the same saved history.
+          </div>
         </article>
       </div>
     </section>

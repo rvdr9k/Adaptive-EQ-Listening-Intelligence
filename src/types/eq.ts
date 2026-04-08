@@ -58,6 +58,27 @@ export type HistoryInsights = {
   patterns: InsightPattern[]
 }
 
+export type UploadedTrack = {
+  id: string
+  title: string
+  originalFilename: string
+  mimeType: string
+  fileSize: number
+  durationSeconds: number | null
+  storagePath: string
+  createdAt: string
+  userId: string | null
+}
+
+export type SaveTrackInput = {
+  title: string
+  durationSeconds: number | null
+}
+
+export type PlayableTrack = UploadedTrack & {
+  playbackUrl: string
+}
+
 export type PlayerQueueItem = {
   id: string
   title: string

@@ -1,9 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
-import type { PlayerState } from '../../types/eq'
+import { saveUploadedTrack } from '../../services/uploadedTracksService'
+import type { PlayableTrack, PlayerState } from '../../types/eq'
 
 type AudioPlayerViewProps = {
+  onTrackSaved: () => Promise<void>
+  openedTrack: PlayableTrack | null
   player: PlayerState
+  playerLoadError?: string
 }
 
 const SUPPORTED_AUDIO_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg']
@@ -19,24 +23,86 @@ const formatTime = (value: number) => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`
 }
 
-export function AudioPlayerView({ player }: AudioPlayerViewProps) {
+const getInitialTrackState = (
+  player: PlayerState,
+  openedTrack: PlayableTrack | null,
+) =>
+  openedTrack
+    ? {
+        ...player.track,
+        title: openedTrack.title,
+        artist: 'Saved upload',
+        genre: 'Cloud track',
+      }
+    : player.track
+
+const getInitialPlaybackState = (
+  player: PlayerState,
+  openedTrack: PlayableTrack | null,
+) =>
+  openedTrack
+    ? {
+        elapsedLabel: '0:00',
+        durationLabel:
+          openedTrack.durationSeconds !== null ? formatTime(openedTrack.durationSeconds) : '--:--',
+        progressPercent: 0,
+        status: 'Paused' as const,
+      }
+    : player.playback
+
+export function AudioPlayerView({
+  onTrackSaved,
+  openedTrack,
+  player,
+  playerLoadError,
+}: AudioPlayerViewProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
-  const [status, setStatus] = useState(player.playback.status)
-  const [selectedTrack, setSelectedTrack] = useState(player.track)
-  const [playback, setPlayback] = useState(player.playback)
-  const [selectedFileName, setSelectedFileName] = useState('')
-  const [objectUrl, setObjectUrl] = useState<string | null>(null)
+  const [status, setStatus] = useState<'Playing' | 'Paused'>(
+    openedTrack ? 'Paused' : player.playback.status,
+  )
+  const [selectedTrack, setSelectedTrack] = useState(() =>
+    getInitialTrackState(player, openedTrack),
+  )
+  const [playback, setPlayback] = useState(() =>
+    getInitialPlaybackState(player, openedTrack),
+  )
+  const [selectedFileName, setSelectedFileName] = useState(
+    openedTrack?.originalFilename ?? '',
+  )
+  const [localFile, setLocalFile] = useState<File | null>(null)
+  const [audioSource, setAudioSource] = useState<string | null>(
+    openedTrack?.playbackUrl ?? null,
+  )
+  const [audioSourceKind, setAudioSourceKind] = useState<'object' | 'remote' | null>(
+    openedTrack ? 'remote' : null,
+  )
   const [fileError, setFileError] = useState('')
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'success' | 'error'>(
+    openedTrack ? 'success' : 'idle',
+  )
+  const [saveMessage, setSaveMessage] = useState(
+    openedTrack ? 'Loaded from cloud history.' : '',
+  )
   const hasTrack = Boolean(selectedTrack.title)
   const hasCurve = player.curve.bands.length > 0
 
   useEffect(() => {
     return () => {
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl)
+      if (audioSource && audioSourceKind === 'object') {
+        URL.revokeObjectURL(audioSource)
       }
     }
-  }, [objectUrl])
+  }, [audioSource, audioSourceKind])
+
+  const resetPlaybackState = () => {
+    setStatus('Paused')
+    setPlayback({
+      elapsedLabel: '0:00',
+      durationLabel: '--:--',
+      progressPercent: 0,
+      status: 'Paused',
+    })
+  }
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -51,22 +117,20 @@ export function AudioPlayerView({ player }: AudioPlayerViewProps) {
       return
     }
 
-    setFileError('')
-    setSelectedFileName(file.name)
-
-    if (objectUrl) {
-      URL.revokeObjectURL(objectUrl)
+    if (audioSource && audioSourceKind === 'object') {
+      URL.revokeObjectURL(audioSource)
     }
 
     const nextUrl = URL.createObjectURL(file)
-    setObjectUrl(nextUrl)
-    setStatus('Paused')
-    setPlayback({
-      elapsedLabel: '0:00',
-      durationLabel: '--:--',
-      progressPercent: 0,
-      status: 'Paused',
-    })
+
+    setFileError('')
+    setSaveState('idle')
+    setSaveMessage('')
+    setLocalFile(file)
+    setSelectedFileName(file.name)
+    setAudioSource(nextUrl)
+    setAudioSourceKind('object')
+    resetPlaybackState()
     setSelectedTrack({
       ...player.track,
       title: file.name.replace(/\.[^/.]+$/, ''),
@@ -78,7 +142,7 @@ export function AudioPlayerView({ player }: AudioPlayerViewProps) {
   }
 
   const handleTogglePlayback = async () => {
-    if (!audioRef.current || !objectUrl) {
+    if (!audioRef.current || !audioSource) {
       return
     }
 
@@ -92,6 +156,36 @@ export function AudioPlayerView({ player }: AudioPlayerViewProps) {
     audioRef.current.pause()
     setStatus('Paused')
     setPlayback((current) => ({ ...current, status: 'Paused' }))
+  }
+
+  const handleSave = async () => {
+    if (!localFile) {
+      return
+    }
+
+    setSaveState('saving')
+    setSaveMessage('Saving track to cloud...')
+
+    try {
+      const durationSeconds =
+        playback.durationLabel !== '--:--' && audioRef.current
+          ? Math.round(audioRef.current.duration)
+          : null
+
+      await saveUploadedTrack(localFile, {
+        title: selectedTrack.title || localFile.name.replace(/\.[^/.]+$/, ''),
+        durationSeconds,
+      })
+
+      setSaveState('success')
+      setSaveMessage('Track saved successfully.')
+      await onTrackSaved()
+    } catch (error) {
+      setSaveState('error')
+      setSaveMessage(
+        error instanceof Error ? error.message : 'Unable to save track right now.',
+      )
+    }
   }
 
   const handleLoadedMetadata = () => {
@@ -169,9 +263,11 @@ export function AudioPlayerView({ player }: AudioPlayerViewProps) {
             </label>
             {selectedFileName ? <p className="upload-meta">{selectedFileName}</p> : null}
             {fileError ? <p className="upload-error">{fileError}</p> : null}
+            {playerLoadError ? <p className="upload-error">{playerLoadError}</p> : null}
 
             <div className="player-pills">
               <span className="pill">{status}</span>
+              <span className={`pill pill--status pill--${saveState}`}>{saveState}</span>
             </div>
 
             <div className="progress-shell progress-shell--large">
@@ -191,23 +287,29 @@ export function AudioPlayerView({ player }: AudioPlayerViewProps) {
               </button>
               <button
                 className="primary-button primary-button--round"
-                disabled={!objectUrl}
+                disabled={!audioSource}
                 onClick={() => void handleTogglePlayback()}
                 type="button"
               >
                 {status === 'Playing' ? 'PAUSE' : 'PLAY'}
               </button>
-              <button className="ghost-button ghost-button--round" disabled type="button">
-                NEXT
+              <button
+                className="ghost-button"
+                disabled={!localFile || saveState === 'saving'}
+                onClick={() => void handleSave()}
+                type="button"
+              >
+                {saveState === 'saving' ? 'Saving...' : 'Save'}
               </button>
             </div>
+            {saveMessage ? <p className="upload-meta">{saveMessage}</p> : null}
 
             <audio
               ref={audioRef}
               onEnded={handleEnded}
               onLoadedMetadata={handleLoadedMetadata}
               onTimeUpdate={handleTimeUpdate}
-              src={objectUrl ?? undefined}
+              src={audioSource ?? undefined}
             />
           </div>
         </article>
@@ -239,7 +341,7 @@ export function AudioPlayerView({ player }: AudioPlayerViewProps) {
               </div>
             </>
           ) : (
-            <div className="queue-empty">EQ details will appear here once audio is loaded.</div>
+            <div className="queue-empty">EQ details will appear here once analysis is added.</div>
           )}
         </article>
       </div>
@@ -248,21 +350,7 @@ export function AudioPlayerView({ player }: AudioPlayerViewProps) {
         <div className="card side-card">
           <span className="eyebrow">Up next</span>
           <h3>Queue</h3>
-          {player.queue.length > 0 ? (
-            <div className="queue-list">
-              {player.queue.map((item) => (
-                <div className={`queue-item${item.isActive ? ' is-active' : ''}`} key={item.id}>
-                  <div>
-                    <strong>{item.title}</strong>
-                    <p>{item.artist}</p>
-                  </div>
-                  <span>{item.durationLabel}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="queue-empty">No songs queued yet.</div>
-          )}
+          <div className="queue-empty">Queue support is still empty in this step.</div>
         </div>
       </aside>
     </section>

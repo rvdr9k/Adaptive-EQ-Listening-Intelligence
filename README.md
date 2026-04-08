@@ -55,8 +55,24 @@ npm run dev
 npm run build
 ```
 
+## Supabase Setup
+
+This app now supports saving uploaded audio files to Supabase Storage and showing them in the History page.
+
+1. Create a Supabase project
+2. Run the SQL in `supabase/schema.sql`
+3. Create a `.env` file from `.env.example`
+4. Fill in:
+
+```bash
+VITE_SUPABASE_URL=your-project-url
+VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_SUPABASE_AUDIO_BUCKET=uploaded-audio
+```
+
+After that, uploaded files can be saved from the player and reopened from history.
+
 ## Goal
 
 The goal is to build an adaptive EQ system that improves audio automatically while learning from music content and listener behavior over time.
-
 
