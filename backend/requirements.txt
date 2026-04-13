@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+supabase
+python-dotenv
+requests
+librosa
+opensmile
+soundfile
+numpy
