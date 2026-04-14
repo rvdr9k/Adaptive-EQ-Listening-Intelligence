@@ -1,78 +1,70 @@
 # Adaptive EQ AI
 
-Adaptive EQ AI is a simple intelligent audio system that aims to automatically adjust equalization based on the song, listening patterns, and user preferences for a more personalized sound experience.
+Adaptive EQ AI is a cloud-backed audio app for upload, playback, saved history, and backend-connected EQ workflow UI.
 
-## Overview
+## Highlights
 
-Adaptive EQ AI is designed to move beyond static presets by analyzing audio and shaping EQ output dynamically. The long-term goal is to combine audio understanding, user behavior, and AI-generated insights into one adaptive listening system.
+- Clean multi-page experience: `Intro`, `Dashboard`, `Player`, `History`
+- Real local audio playback (`mp3`, `wav`, `ogg`)
+- Save tracks to Supabase Storage + metadata to Supabase Postgres
+- Reopen saved tracks from History into Player
+- FastAPI backend with live `/health` integration in the frontend
 
-## Features
+## Tech Stack
 
-- EQ dashboard for visual tuning insights
-- Audio player with a modern music-app style interface
-- History and insights page for past songs and tuning patterns
-- Mock adaptive EQ recommendations in the current frontend
-- Modular structure for future backend and AI integration
+- React + TypeScript + Vite
+- Custom CSS UI
+- Supabase (Storage + Postgres)
+- FastAPI
 
-## How It Works
+## Quick Start
 
-1. Audio Input  
-   A song or audio stream is provided to the system.
-
-2. Feature Extraction  
-   Audio features such as spectrum, energy, tempo, and tonal balance are analyzed.
-
-3. EQ Decision Layer  
-   A rule-based or ML-based system determines the best EQ adjustments.
-
-4. Personalization Layer  
-   User history, habits, and repeated preferences influence recommendations.
-
-5. Output  
-   The system applies EQ settings and presents enhanced playback with insights.
-
-## Tech Direction
-
-- Frontend: React + TypeScript + Vite
-- Styling: Custom CSS
-- Backend:
-- Audio processing:
-- AI / ML:
-
-## How to run
-
-1. Install dependencies
-2. Run the frontend locally
+### 1) Frontend
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Build
+### 2) Backend
 
 ```bash
-npm run build
+cd backend
+python -m pip install -r requirements.txt
+python -m uvicorn app.main:app --reload
 ```
 
-## Supabase Setup
+Health URL:
 
-This app now supports saving uploaded audio files to Supabase Storage and showing them in the History page.
+`http://127.0.0.1:8000/health`
 
-1. Create a Supabase project
-2. Run the SQL in `supabase/schema.sql`
-3. Create a `.env` file from `.env.example`
-4. Fill in:
+## Environment
+
+### Frontend `.env`
 
 ```bash
 VITE_SUPABASE_URL=your-project-url
 VITE_SUPABASE_ANON_KEY=your-anon-key
 VITE_SUPABASE_AUDIO_BUCKET=uploaded-audio
+VITE_ANALYSIS_API_URL=http://127.0.0.1:8000
 ```
 
-After that, uploaded files can be saved from the player and reopened from history.
+### Backend `backend/.env`
 
-## Goal
+```bash
+FRONTEND_ORIGINS=https://adaptive-eq-listening-intelligence.vercel.app,http://127.0.0.1:5173,http://localhost:5173
+BACKEND_API_VERSION=0.1.0
+```
 
-The goal is to build an adaptive EQ system that improves audio automatically while learning from music content and listener behavior over time.
+## Supabase Setup
 
+1. Create a Supabase project
+2. Run SQL in `supabase/schema.sql`
+3. Add frontend `.env` values
+4. Run app and test upload -> save -> history reopen flow
+
+## Build
+
+```bash
+npm run build
+```
