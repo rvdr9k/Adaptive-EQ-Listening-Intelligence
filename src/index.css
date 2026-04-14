@@ -126,7 +126,8 @@ button {
 .secondary-link,
 .topbar-chip,
 .primary-button,
-.ghost-button {
+.ghost-button,
+.backend-chip {
   border-radius: 999px;
   transition:
     transform 180ms ease,
@@ -143,14 +144,16 @@ button {
 
 .secondary-link,
 .topbar-chip,
-.ghost-button {
+.ghost-button,
+.backend-chip {
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.05);
 }
 
 .primary-link,
 .secondary-link,
-.topbar-chip {
+.topbar-chip,
+.backend-chip {
   padding: 12px 18px;
 }
 
@@ -161,6 +164,27 @@ button {
 .ghost-button:hover,
 .sidebar-link:hover {
   transform: translateY(-1px);
+}
+
+.backend-chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.85rem;
+  cursor: default;
+}
+
+.backend-chip--checking {
+  color: #ffd27d;
+}
+
+.backend-chip--online {
+  color: #b8ffcf;
+  border-color: rgba(30, 215, 96, 0.45);
+}
+
+.backend-chip--offline {
+  color: #ff9696;
+  border-color: rgba(255, 150, 150, 0.45);
 }
 
 .landing-showcase {

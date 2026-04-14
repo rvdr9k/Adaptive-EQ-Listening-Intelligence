@@ -3,6 +3,8 @@ import type { ScreenId } from '../types/eq'
 
 type AppShellProps = PropsWithChildren<{
   activeScreen: Exclude<ScreenId, 'intro'>
+  backendHealthMessage: string
+  backendHealthStatus: 'checking' | 'online' | 'offline'
   isLoading: boolean
 }>
 
@@ -18,6 +20,8 @@ const navItems: Array<{
 
 export function AppShell({
   activeScreen,
+  backendHealthMessage,
+  backendHealthStatus,
   isLoading,
   children,
 }: AppShellProps) {
@@ -63,6 +67,9 @@ export function AppShell({
             <h1>{navItems.find((item) => item.id === activeScreen)?.label}</h1>
           </div>
           <div className="topbar-actions">
+            <span className={`backend-chip backend-chip--${backendHealthStatus}`}>
+              {backendHealthMessage}
+            </span>
             <a className="topbar-chip" href="#/player">
               Open player
             </a>

@@ -4,6 +4,11 @@ import { HistoryInsightsView } from './features/history/HistoryInsightsView'
 import { LandingPage } from './features/landing/LandingPage'
 import { AudioPlayerView } from './features/player/AudioPlayerView'
 import { supabaseConfigError } from './lib/supabase'
+import {
+  fetchBackendHealth,
+  getInitialBackendHealth,
+  type BackendHealthState,
+} from './services/analysisApiService'
 import { getDashboardSummary, getHistoryInsights, getPlayerState } from './services/mockEqService'
 import { getPlayableTrack, listUploadedTracks } from './services/uploadedTracksService'
 import { AppShell } from './shared/AppShell'
@@ -43,6 +48,9 @@ const getRouteFromHash = (): ScreenId => {
 function App() {
   const [activeScreen, setActiveScreen] = useState<ScreenId>(getRouteFromHash)
   const [data, setData] = useState<AppDataState>(initialState)
+  const [backendHealth, setBackendHealth] = useState<BackendHealthState>(
+    getInitialBackendHealth,
+  )
   const [uploadedTracks, setUploadedTracks] = useState<UploadedTrack[]>([])
   const [historyMessage, setHistoryMessage] = useState(supabaseConfigError ?? '')
   const [playerLoadError, setPlayerLoadError] = useState('')
@@ -59,6 +67,15 @@ function App() {
     return () => {
       window.removeEventListener('hashchange', handleHashChange)
     }
+  }, [])
+
+  useEffect(() => {
+    const checkBackendHealth = async () => {
+      const status = await fetchBackendHealth()
+      setBackendHealth(status)
+    }
+
+    void checkBackendHealth()
   }, [])
 
   useEffect(() => {
@@ -111,7 +128,12 @@ function App() {
   }
 
   return (
-    <AppShell activeScreen={activeScreen} isLoading={isLoading}>
+    <AppShell
+      activeScreen={activeScreen}
+      backendHealthMessage={backendHealth.message}
+      backendHealthStatus={backendHealth.status}
+      isLoading={isLoading}
+    >
       {activeScreen === 'dashboard' && data.dashboard ? (
         <DashboardView summary={data.dashboard} />
       ) : null}
