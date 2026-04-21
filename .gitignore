@@ -27,3 +27,7 @@ passwords.md
 *.sw?
 docs
 runbook.md
+
+# Python caches
+__pycache__/
+*.pyc
