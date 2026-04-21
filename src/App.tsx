@@ -6,13 +6,18 @@ import { AudioPlayerView } from './features/player/AudioPlayerView'
 import { supabaseConfigError } from './lib/supabase'
 import {
   fetchBackendHealth,
+  getTrackAnalysis,
   getInitialBackendHealth,
+  runTrackAnalysis,
   type BackendHealthState,
+  type TrackAnalysisResult,
 } from './services/analysisApiService'
 import { getDashboardSummary, getHistoryInsights, getPlayerState } from './services/mockEqService'
 import { getPlayableTrack, listUploadedTracks } from './services/uploadedTracksService'
 import { AppShell } from './shared/AppShell'
 import type {
+  DashboardAnalysisStatus,
+  DashboardTrackAnalysis,
   DashboardSummary,
   HistoryInsights,
   PlayableTrack,
@@ -52,6 +57,12 @@ function App() {
     getInitialBackendHealth,
   )
   const [uploadedTracks, setUploadedTracks] = useState<UploadedTrack[]>([])
+  const [selectedDashboardTrackId, setSelectedDashboardTrackId] = useState('')
+  const [analysisStatus, setAnalysisStatus] = useState<DashboardAnalysisStatus>('idle')
+  const [analysisMessage, setAnalysisMessage] = useState(
+    'Choose a saved track and run analysis.',
+  )
+  const [analysisResult, setAnalysisResult] = useState<DashboardTrackAnalysis | null>(null)
   const [historyMessage, setHistoryMessage] = useState(supabaseConfigError ?? '')
   const [playerLoadError, setPlayerLoadError] = useState('')
   const [selectedPlayableTrack, setSelectedPlayableTrack] = useState<PlayableTrack | null>(null)
@@ -77,6 +88,62 @@ function App() {
 
     void checkBackendHealth()
   }, [])
+
+  useEffect(() => {
+    if (uploadedTracks.length === 0) {
+      setSelectedDashboardTrackId('')
+      setAnalysisStatus('idle')
+      setAnalysisResult(null)
+      setAnalysisMessage('Save tracks in Player to run analysis.')
+      return
+    }
+
+    setSelectedDashboardTrackId((current) =>
+      current && uploadedTracks.some((track) => track.id === current)
+        ? current
+        : uploadedTracks[0]?.id ?? '',
+    )
+  }, [uploadedTracks])
+
+  useEffect(() => {
+    const loadExistingAnalysis = async () => {
+      if (!selectedDashboardTrackId) {
+        return
+      }
+
+      try {
+        const result = await getTrackAnalysis(selectedDashboardTrackId)
+
+        if (!result) {
+          setAnalysisStatus('idle')
+          setAnalysisResult(null)
+          setAnalysisMessage('No analysis yet. Click Analyze to generate one.')
+          return
+        }
+
+        const mappedResult: DashboardTrackAnalysis = {
+          trackId: result.trackId,
+          summary: result.summary,
+          eqRecommendation: result.eqRecommendation,
+          tempoBpmEstimate: result.tempoBpmEstimate,
+          energyLevel: result.energyLevel,
+          updatedAt: result.updatedAt,
+        }
+
+        setAnalysisStatus('success')
+        setAnalysisResult(mappedResult)
+        setAnalysisMessage('Loaded existing analysis for this track.')
+      } catch (error) {
+        setAnalysisStatus('error')
+        setAnalysisResult(null)
+        setAnalysisMessage(
+          error instanceof Error ? error.message : 'Unable to fetch analysis.',
+        )
+      }
+    }
+
+    void loadExistingAnalysis()
+  }, [selectedDashboardTrackId])
 
   useEffect(() => {
     const loadAppData = async () => {
@@ -110,6 +177,39 @@ function App() {
     }
   }
 
+  const handleRunAnalysis = async () => {
+    if (!selectedDashboardTrackId) {
+      setAnalysisStatus('idle')
+      setAnalysisResult(null)
+      setAnalysisMessage('Select a track first.')
+      return
+    }
+
+    setAnalysisStatus('loading')
+    setAnalysisMessage('Running mock analysis...')
+
+    try {
+      const result: TrackAnalysisResult = await runTrackAnalysis(selectedDashboardTrackId)
+
+      setAnalysisStatus('success')
+      setAnalysisResult({
+        trackId: result.trackId,
+        summary: result.summary,
+        eqRecommendation: result.eqRecommendation,
+        tempoBpmEstimate: result.tempoBpmEstimate,
+        energyLevel: result.energyLevel,
+        updatedAt: result.updatedAt,
+      })
+      setAnalysisMessage('Analysis complete.')
+    } catch (error) {
+      setAnalysisStatus('error')
+      setAnalysisResult(null)
+      setAnalysisMessage(
+        error instanceof Error ? error.message : 'Analysis failed to run.',
+      )
+    }
+  }
+
   const handleOpenTrack = async (trackId: string) => {
     try {
       const track = await getPlayableTrack(trackId)
@@ -135,7 +235,16 @@ function App() {
       isLoading={isLoading}
     >
       {activeScreen === 'dashboard' && data.dashboard ? (
-        <DashboardView summary={data.dashboard} />
+        <DashboardView
+          analysisMessage={analysisMessage}
+          analysisResult={analysisResult}
+          analysisStatus={analysisStatus}
+          onAnalyze={handleRunAnalysis}
+          onSelectTrack={setSelectedDashboardTrackId}
+          selectedTrackId={selectedDashboardTrackId}
+          summary={data.dashboard}
+          tracks={uploadedTracks}
+        />
       ) : null}
       {activeScreen === 'player' && data.player ? (
         <AudioPlayerView

@@ -79,6 +79,17 @@ export type PlayableTrack = UploadedTrack & {
   playbackUrl: string
 }
 
+export type DashboardAnalysisStatus = 'idle' | 'loading' | 'success' | 'error'
+
+export type DashboardTrackAnalysis = {
+  trackId: string
+  summary: string
+  eqRecommendation: string
+  tempoBpmEstimate: number
+  energyLevel: string
+  updatedAt: string
+}
+
 export type PlayerQueueItem = {
   id: string
   title: string

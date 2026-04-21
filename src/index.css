@@ -116,7 +116,8 @@ button {
 .topbar-actions,
 .tag-row,
 .player-pills,
-.control-row {
+.control-row,
+.analysis-controls {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
@@ -652,6 +653,29 @@ button {
   margin-top: 12px;
   padding: 12px 14px;
   color: #b8ffcf;
+}
+
+.analysis-select {
+  min-width: 240px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: #f4f7f8;
+}
+
+.analysis-select option {
+  color: #111;
+}
+
+.analysis-result {
+  margin-top: 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.analysis-result p {
+  margin: 0;
 }
 
 @media (max-width: 1180px) {

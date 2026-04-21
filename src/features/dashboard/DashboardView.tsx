@@ -1,10 +1,31 @@
-import type { DashboardSummary } from '../../types/eq'
+import type {
+  DashboardAnalysisStatus,
+  DashboardSummary,
+  DashboardTrackAnalysis,
+  UploadedTrack,
+} from '../../types/eq'
 
 type DashboardViewProps = {
+  analysisMessage: string
+  analysisResult: DashboardTrackAnalysis | null
+  analysisStatus: DashboardAnalysisStatus
+  onAnalyze: () => Promise<void>
+  onSelectTrack: (trackId: string) => void
+  selectedTrackId: string
   summary: DashboardSummary
+  tracks: UploadedTrack[]
 }
 
-export function DashboardView({ summary }: DashboardViewProps) {
+export function DashboardView({
+  analysisMessage,
+  analysisResult,
+  analysisStatus,
+  onAnalyze,
+  onSelectTrack,
+  selectedTrackId,
+  summary,
+  tracks,
+}: DashboardViewProps) {
   const hasTrack = Boolean(summary.currentTrack.title)
   const hasCurve = summary.curve.bands.length > 0
   const peak = Math.max(...summary.curve.bands.map((band) => Math.abs(band.gainDb)), 1)
@@ -82,11 +103,45 @@ export function DashboardView({ summary }: DashboardViewProps) {
 
       <div className="dashboard-grid dashboard-grid--secondary">
         <article className="card">
-          <span className="eyebrow">Selected mode</span>
-          <h3>{summary.recommendation.listeningMode || 'No mode selected'}</h3>
-          <p className="subtle-copy">
-            Listening mode details will appear here after analysis is available.
-          </p>
+          <span className="eyebrow">Track analysis</span>
+          <h3>{selectedTrackId ? 'Ready to analyze' : 'Select a saved track'}</h3>
+          {tracks.length > 0 ? (
+            <div className="analysis-controls">
+              <select
+                className="analysis-select"
+                onChange={(event) => onSelectTrack(event.target.value)}
+                value={selectedTrackId}
+              >
+                <option value="">Choose a saved track</option>
+                {tracks.map((track) => (
+                  <option key={track.id} value={track.id}>
+                    {track.title}
+                  </option>
+                ))}
+              </select>
+              <button
+                className="primary-button"
+                disabled={!selectedTrackId || analysisStatus === 'loading'}
+                onClick={() => void onAnalyze()}
+                type="button"
+              >
+                {analysisStatus === 'loading' ? 'Analyzing...' : 'Analyze'}
+              </button>
+            </div>
+          ) : (
+            <div className="queue-empty">Save tracks in Player to run dashboard analysis.</div>
+          )}
+          <p className="subtle-copy">{analysisMessage}</p>
+          {analysisResult ? (
+            <div className="analysis-result">
+              <p>{analysisResult.summary}</p>
+              <p>{analysisResult.eqRecommendation}</p>
+              <div className="tag-row">
+                <span className="tag">Tempo {analysisResult.tempoBpmEstimate} BPM</span>
+                <span className="tag">{analysisResult.energyLevel}</span>
+              </div>
+            </div>
+          ) : null}
         </article>
 
         <article className="card">
