@@ -29,7 +29,11 @@ export function DashboardView({
   const hasTrack = Boolean(summary.currentTrack.title)
   const hasCurve = summary.curve.bands.length > 0
   const peak = Math.max(...summary.curve.bands.map((band) => Math.abs(band.gainDb)), 1)
-  const analysisTitle = tracks.find((track) => track.id === selectedTrackId)?.title ?? ''
+const analysisTitle = tracks.find((track) => track.id === selectedTrackId)?.title ?? ''
+  const durationLabel =
+    analysisResult?.durationSeconds !== null && analysisResult?.durationSeconds !== undefined
+      ? `${Math.round(analysisResult.durationSeconds)}s`
+      : 'n/a'
 
   return (
     <section className="panel-stack">
@@ -148,7 +152,12 @@ export function DashboardView({
               </div>
               <div className="tag-row">
                 <span className="tag">Tempo {analysisResult.tempoBpmEstimate} BPM</span>
+                <span className="tag">Duration {durationLabel}</span>
                 <span className="tag">{analysisResult.energyLevel}</span>
+              </div>
+              <div className="tag-row">
+                <span className="tag">RMS {analysisResult.rmsEnergy.toFixed(3)}</span>
+                <span className="tag">Centroid {Math.round(analysisResult.spectralCentroidHz)} Hz</span>
               </div>
             </div>
           ) : null}

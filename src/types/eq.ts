@@ -86,6 +86,9 @@ export type DashboardTrackAnalysis = {
   summary: string
   eqRecommendation: string
   tempoBpmEstimate: number
+  durationSeconds: number | null
+  rmsEnergy: number
+  spectralCentroidHz: number
   energyLevel: string
   updatedAt: string
 }
