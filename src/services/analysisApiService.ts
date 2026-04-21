@@ -9,6 +9,9 @@ export type TrackAnalysisResult = {
   summary: string
   eqRecommendation: string
   tempoBpmEstimate: number
+  durationSeconds: number | null
+  rmsEnergy: number
+  spectralCentroidHz: number
   energyLevel: string
   updatedAt: string
 }
@@ -30,6 +33,12 @@ const mapAnalysisPayload = (payload: Record<string, unknown>): TrackAnalysisResu
   summary: String(payload.summary ?? ''),
   eqRecommendation: String(payload.eq_recommendation ?? ''),
   tempoBpmEstimate: Number(payload.tempo_bpm_estimate ?? 0),
+  durationSeconds:
+    payload.duration_seconds === null || payload.duration_seconds === undefined
+      ? null
+      : Number(payload.duration_seconds),
+  rmsEnergy: Number(payload.rms_energy ?? 0),
+  spectralCentroidHz: Number(payload.spectral_centroid_hz ?? 0),
   energyLevel: String(payload.energy_level ?? ''),
   updatedAt: String(payload.updated_at ?? ''),
 })
@@ -90,9 +99,19 @@ export const getTrackAnalysis = async (
   return mapAnalysisPayload(payload)
 }
 
-export const runTrackAnalysis = async (trackId: string): Promise<TrackAnalysisResult> => {
+export const runTrackAnalysis = async (
+  trackId: string,
+  input: { audioUrl: string; mimeType?: string },
+): Promise<TrackAnalysisResult> => {
   const response = await fetch(`${getApiBaseUrl()}/analysis/${trackId}`, {
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      audio_url: input.audioUrl,
+      mime_type: input.mimeType ?? null,
+    }),
   })
 
   if (!response.ok) {

@@ -130,6 +130,9 @@ function App() {
           summary: result.summary,
           eqRecommendation: result.eqRecommendation,
           tempoBpmEstimate: result.tempoBpmEstimate,
+          durationSeconds: result.durationSeconds,
+          rmsEnergy: result.rmsEnergy,
+          spectralCentroidHz: result.spectralCentroidHz,
           energyLevel: result.energyLevel,
           updatedAt: result.updatedAt,
         }
@@ -190,10 +193,16 @@ function App() {
     }
 
     setAnalysisStatus('loading')
-    setAnalysisMessage('Running analysis...')
+    setAnalysisMessage('Preparing audio for analysis...')
 
     try {
-      const result: TrackAnalysisResult = await runTrackAnalysis(selectedDashboardTrackId)
+      const playable = await getPlayableTrack(selectedDashboardTrackId)
+
+      setAnalysisMessage('Running analysis...')
+      const result: TrackAnalysisResult = await runTrackAnalysis(selectedDashboardTrackId, {
+        audioUrl: playable.playbackUrl,
+        mimeType: playable.mimeType,
+      })
 
       setAnalysisStatus('success')
       setAnalysisResult({
@@ -201,6 +210,9 @@ function App() {
         summary: result.summary,
         eqRecommendation: result.eqRecommendation,
         tempoBpmEstimate: result.tempoBpmEstimate,
+        durationSeconds: result.durationSeconds,
+        rmsEnergy: result.rmsEnergy,
+        spectralCentroidHz: result.spectralCentroidHz,
         energyLevel: result.energyLevel,
         updatedAt: result.updatedAt,
       })
