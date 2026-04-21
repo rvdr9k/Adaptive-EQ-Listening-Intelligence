@@ -29,6 +29,7 @@ export function DashboardView({
   const hasTrack = Boolean(summary.currentTrack.title)
   const hasCurve = summary.curve.bands.length > 0
   const peak = Math.max(...summary.curve.bands.map((band) => Math.abs(band.gainDb)), 1)
+  const analysisTitle = tracks.find((track) => track.id === selectedTrackId)?.title ?? ''
 
   return (
     <section className="panel-stack">
@@ -104,38 +105,47 @@ export function DashboardView({
       <div className="dashboard-grid dashboard-grid--secondary">
         <article className="card">
           <span className="eyebrow">Track analysis</span>
-          <h3>{selectedTrackId ? 'Ready to analyze' : 'Select a saved track'}</h3>
+          <h3>{analysisTitle || (tracks.length > 0 ? 'Select a saved track' : 'No saved tracks')}</h3>
           {tracks.length > 0 ? (
-            <div className="analysis-controls">
-              <select
-                className="analysis-select"
-                onChange={(event) => onSelectTrack(event.target.value)}
-                value={selectedTrackId}
-              >
-                <option value="">Choose a saved track</option>
-                {tracks.map((track) => (
-                  <option key={track.id} value={track.id}>
-                    {track.title}
-                  </option>
-                ))}
-              </select>
-              <button
-                className="primary-button"
-                disabled={!selectedTrackId || analysisStatus === 'loading'}
-                onClick={() => void onAnalyze()}
-                type="button"
-              >
-                {analysisStatus === 'loading' ? 'Analyzing...' : 'Analyze'}
-              </button>
-            </div>
+            <>
+              <div className="analysis-controls">
+                <select
+                  className="analysis-select"
+                  onChange={(event) => onSelectTrack(event.target.value)}
+                  value={selectedTrackId}
+                >
+                  <option value="">Choose a saved track</option>
+                  {tracks.map((track) => (
+                    <option key={track.id} value={track.id}>
+                      {track.title}
+                    </option>
+                  ))}
+                </select>
+                <div className="analysis-actions">
+                  <span className={`pill pill--status pill--${analysisStatus}`}>
+                    {analysisStatus}
+                  </span>
+                  <button
+                    className="primary-button"
+                    disabled={!selectedTrackId || analysisStatus === 'loading'}
+                    onClick={() => void onAnalyze()}
+                    type="button"
+                  >
+                    {analysisStatus === 'loading' ? 'Analyzing...' : 'Analyze'}
+                  </button>
+                </div>
+              </div>
+              <p className="subtle-copy analysis-message">{analysisMessage}</p>
+            </>
           ) : (
             <div className="queue-empty">Save tracks in Player to run dashboard analysis.</div>
           )}
-          <p className="subtle-copy">{analysisMessage}</p>
           {analysisResult ? (
             <div className="analysis-result">
-              <p>{analysisResult.summary}</p>
-              <p>{analysisResult.eqRecommendation}</p>
+              <div className="analysis-result__copy">
+                <p>{analysisResult.summary}</p>
+                <p className="subtle-copy">{analysisResult.eqRecommendation}</p>
+              </div>
               <div className="tag-row">
                 <span className="tag">Tempo {analysisResult.tempoBpmEstimate} BPM</span>
                 <span className="tag">{analysisResult.energyLevel}</span>

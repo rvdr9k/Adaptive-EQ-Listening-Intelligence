@@ -36,7 +36,7 @@ const mapAnalysisPayload = (payload: Record<string, unknown>): TrackAnalysisResu
 
 export const getInitialBackendHealth = (): BackendHealthState => ({
   status: 'checking',
-  message: 'Checking analysis backend...',
+  message: 'API: checking',
 })
 
 export const fetchBackendHealth = async (): Promise<BackendHealthState> => {
@@ -52,21 +52,19 @@ export const fetchBackendHealth = async (): Promise<BackendHealthState> => {
     if (!response.ok) {
       return {
         status: 'offline',
-        message: `Backend unavailable (HTTP ${response.status}).`,
+        message: `API: offline (HTTP ${response.status})`,
       }
     }
 
     const payload = (await response.json()) as BackendHealthResponse
-    const serviceLabel = payload.service ?? 'Analysis API'
-
     return {
       status: 'online',
-      message: `${serviceLabel} is online.`,
+      message: payload.service ? `API: online` : 'API: online',
     }
   } catch {
     return {
       status: 'offline',
-      message: 'Backend is offline. Start FastAPI at 127.0.0.1:8000.',
+      message: 'API: offline',
     }
   } finally {
     window.clearTimeout(timeoutId)

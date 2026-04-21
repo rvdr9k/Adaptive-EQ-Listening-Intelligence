@@ -73,7 +73,7 @@ export function AppShell({
             <a className="topbar-chip" href="#/player">
               Open player
             </a>
-            <a className="topbar-chip topbar-chip--accent" href="#/history">
+            <a className="topbar-chip" href="#/history">
               View insights
             </a>
           </div>

@@ -656,6 +656,7 @@ button {
 }
 
 .analysis-select {
+  flex: 1 1 260px;
   min-width: 240px;
   padding: 10px 14px;
   border-radius: 12px;
@@ -668,14 +669,34 @@ button {
   color: #111;
 }
 
+.analysis-actions {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.analysis-message {
+  margin: 10px 0 0;
+}
+
 .analysis-result {
   margin-top: 14px;
   display: grid;
   gap: 8px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .analysis-result p {
   margin: 0;
+}
+
+.analysis-result__copy {
+  display: grid;
+  gap: 6px;
 }
 
 @media (max-width: 1180px) {

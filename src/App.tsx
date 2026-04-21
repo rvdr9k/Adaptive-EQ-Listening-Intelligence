@@ -89,8 +89,10 @@ function App() {
     void checkBackendHealth()
   }, [])
 
-  useEffect(() => {
-    if (uploadedTracks.length === 0) {
+  const applyUploadedTracks = (tracks: UploadedTrack[]) => {
+    setUploadedTracks(tracks)
+
+    if (tracks.length === 0) {
       setSelectedDashboardTrackId('')
       setAnalysisStatus('idle')
       setAnalysisResult(null)
@@ -98,12 +100,14 @@ function App() {
       return
     }
 
-    setSelectedDashboardTrackId((current) =>
-      current && uploadedTracks.some((track) => track.id === current)
-        ? current
-        : uploadedTracks[0]?.id ?? '',
-    )
-  }, [uploadedTracks])
+    setSelectedDashboardTrackId((current) => {
+      if (current && tracks.some((track) => track.id === current)) {
+        return current
+      }
+
+      return tracks[0]?.id ?? ''
+    })
+  }
 
   useEffect(() => {
     const loadExistingAnalysis = async () => {
@@ -157,7 +161,7 @@ function App() {
       ])
 
       setData({ dashboard, history, player })
-      setUploadedTracks(tracksResult.tracks)
+      applyUploadedTracks(tracksResult.tracks)
       setHistoryMessage((current) => tracksResult.error || current)
       setIsLoading(false)
     }
@@ -168,7 +172,7 @@ function App() {
   const refreshUploadedTracks = async () => {
     try {
       const tracks = await listUploadedTracks()
-      setUploadedTracks(tracks)
+      applyUploadedTracks(tracks)
       setHistoryMessage(supabaseConfigError ?? '')
     } catch (error) {
       setHistoryMessage(
@@ -186,7 +190,7 @@ function App() {
     }
 
     setAnalysisStatus('loading')
-    setAnalysisMessage('Running mock analysis...')
+    setAnalysisMessage('Running analysis...')
 
     try {
       const result: TrackAnalysisResult = await runTrackAnalysis(selectedDashboardTrackId)
